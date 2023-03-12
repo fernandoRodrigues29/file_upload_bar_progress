@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Randon Password Generator</title>
+	<!-- veja esse link -->
+	<!-- https://www.youtube.com/watch?v=_xDCVt1F6O0&list=WL&index=11&t=156s -->
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: sans-serif;
+		}
+		
+		body{
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 100vh;
+			background-color: #6990f2;
+		}
+
+		.conteiner{
+			width: 430px;
+			padding: 30px;
+			background-color: #fff;
+			border-radius: 5px;
+		}
+
+		.conteiner header{
+			color: #6990f2;
+			font-size: 27px;
+			font-weight: 600;
+		}
+		.conteiner form{
+			height: 167px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			border-radius: 5px;
+			border:2px dashed #6990f2;
+			margin: 30px 0;
+			cursor: pointer;
+		}
+
+		
+		form :where(img,p){
+			color: #6990f2;
+		}
+
+		form img{
+			font-size: 50px
+		}
+
+		form p{
+			font-size: 16px
+			margin-top:15px;
+		}
+
+		section .row{
+			background-color: #e9f0ff;
+			margin-bottom: 10px;
+			list-style: none;
+			padding: 15px 20px;
+			border-radius: 5px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+		
+		.progress-area .progress-bar{
+			height: 6px;
+			width: 100%;
+			background-color: #fff;
+			margin-bottom: 4px;
+			border-radius: 30px;
+		}
+  
+		.progress-bar .progress{
+			height: 100%;
+			width: 0%;
+			background-color: #6990f2;
+			border-radius: inherit;
+			transition:.5s;
+		}
+		/*inputfile*/
+		.input-file{
+			/*visibility: hidden;*/
+		}
+
+	</style>
+</head>
+<body>
+	<div class="conteiner">
+		<header>File Upload Javascript</header>
+		<form action="#" method="POST" enctype="multipart/form-data">
+			<input type="file" name="file" class="input-file" hidden>
+			<img src="./img/cloud.png" alt="">
+			<p>Browse File to Upload</p>
+		</form>
+		<section class="progress-area">
+			<div class="row">
+				<img src="./img/file.png" alt="">
+				<div class="content">
+					<div class="details">
+						<span class="name"></span>
+						<span class="percent"></span>
+					</div>
+					<div class="progress-bar">
+						<div class="progress"></div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="uploded-area"></section>
+	</div>
+	<script>
+		const form  = document.querySelector('form');
+		fileInput = form.querySelector('.input-file');
+		progressArea = document.querySelector('.progress-area');
+		uploadArea = document.querySelector('.uploaded-area');
+		
+		let barrProgressFixed = document.querySelector('.progress-bar .progress');
+		let boxDetailsName =  document.querySelector('.details .name');
+		let boxDetailsPercent =  document.querySelector('.details .percent');
+
+		form.addEventListener('click',()=>{
+			fileInput.click();
+		});
+
+		fileInput.onchange = ({target})=>{
+			let file = target.files[0];
+			if(file){
+				let fileName = file.name;
+				// console.log(fileName);
+				uploadFile(fileName);
+			}
+		}
+
+		function uploadFile(name){
+			let xhr = new XMLHttpRequest();
+			xhr.open('POST','http://localhost:8080/server.php');
+			
+			xhr.upload.addEventListener("progress",({loaded,total}) => {
+				console.log('loadede: ',loaded);
+				console.log('total: ',total);
+					let fileLoaded = Math.floor((loaded/total)*100);
+					let fileTotal = Math.floor(total/100);
+					let fileSize;
+						(fileTotal < 1024) ? fileSize = fileTotal+"KB" : fileSize = (loaded/ (1024*1024)).toFixed(2)+"MB";
+					
+
+					// let progressHTML = `<div class="progress" style="width: ${fileLoaded}%"></div>`;
+					console.log(`barra de progresso antes: ${fileLoaded} %`);
+						barrProgressFixed.style.width=`${fileLoaded}%`;
+						boxDetailsName.innerHTML = `${name}`;
+						boxDetailsPercent.innerHTML = `${fileLoaded}%`;
+
+					// uploadArea.classList.add('onprogress');
+					// progressArea.innerHTML = progressHTML;
+
+					if(loaded === total){
+						let progressHTML = `<div class="progress" style="width: ${fileLoaded}%"></div>`;
+						console.log(`barra de progresso final: ${fileLoaded} %`);
+						// uploadArea.classList.add('onprogress');
+						// progressArea.innerAdjacentHTML = ("afterbegin",progressHTML);
+					}
+
+				});
+			
+			let data = new FormData(form);
+			xhr.send(data);	
+
+		}
+
+	</script>
+</body>
+</html>
